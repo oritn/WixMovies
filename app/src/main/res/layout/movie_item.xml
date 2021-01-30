@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="movie"
+            type="com.e.wixmovies.model.MovieDO">
+        </variable>
+    </data>
+    <androidx.cardview.widget.CardView
+
+    android:id="@+id/card_view_friend"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:elevation="4dp"
+        bind:cardCornerRadius="2dp"
+        android:backgroundTint="@color/cardBackground"
+    card_view:cardUseCompatPadding="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/coverImage"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_gravity="center_horizontal"
+            bind:imageUrl="@{ movie.thumbnailUrl}"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="fitXY"/>
+
+        <TextView
+            android:id="@+id/title"
+            style="@style/TitleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:paddingTop="10dp"
+            android:ellipsize="end"
+            android:lines="1"
+            android:text="@{``+movie.title}" />
+        <TextView
+            android:id="@+id/rank"
+            style="@style/RankText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_gravity="bottom"
+            android:paddingTop="10dp"
+            android:text="@{``+movie.rank}"/>
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>
+</layout>

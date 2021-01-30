@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">WixMovies</string>
+    <string name="tab_text_1">Movies</string>
+    <string name="tab_text_2">Watchlist</string>
+</resources>

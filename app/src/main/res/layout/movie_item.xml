@@ -10,7 +10,7 @@
     </data>
     <androidx.cardview.widget.CardView
 
-    android:id="@+id/card_view_friend"
+    android:id="@+id/card_view_movie"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="4dp"
@@ -19,41 +19,65 @@
         android:backgroundTint="@color/cardBackground"
     card_view:cardUseCompatPadding="true">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
 
         <ImageView
             android:id="@+id/coverImage"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:layout_gravity="center_horizontal"
-            bind:imageUrl="@{ movie.thumbnailUrl}"
+            bind:imageUrl="@{movie.fullThumbnailUrl}"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:scaleType="fitXY"/>
 
+
+        <RelativeLayout
+            android:id="@+id/progressLayout"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignBottom="@id/coverImage"
+            android:layout_alignParentLeft="true">
+            <ProgressBar
+                android:id="@+id/progress"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:max="100"
+                android:progressDrawable="@drawable/custom_progress" />
+            <TextView
+                android:id="@+id/rank"
+                style="@style/RankText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+               android:layout_centerInParent="true"
+                android:textSize="14sp"
+                android:text="@{``+movie.rank}"/>
+        </RelativeLayout>
         <TextView
             android:id="@+id/title"
             style="@style/TitleText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:paddingTop="10dp"
+            android:background="#8064BD"
+            android:backgroundTintMode="add"
             android:ellipsize="end"
             android:lines="1"
-            android:text="@{``+movie.title}" />
-        <TextView
-            android:id="@+id/rank"
-            style="@style/RankText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_gravity="bottom"
-            android:paddingTop="10dp"
-            android:text="@{``+movie.rank}"/>
-    </LinearLayout>
+            android:padding="10dp"
+            android:text="@{``+movie.title}"
+            android:textSize="16sp"
+            android:layout_below="@id/progressLayout"
+            />
+        <ImageButton
+            android:id="@+id/moreInfoBtn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_add"
+            android:background="@drawable/roundcorner"
+            android:layout_margin="15dp"
+            android:layout_alignParentRight="true"/>
+    </RelativeLayout>
 
 </androidx.cardview.widget.CardView>
 </layout>

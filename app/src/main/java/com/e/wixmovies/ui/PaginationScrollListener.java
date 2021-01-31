@@ -1,14 +1,13 @@
 package com.e.wixmovies.ui;
 
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 public abstract class PaginationScrollListener extends RecyclerView.OnScrollListener {
     private int visibleThreshold = 5;
     private int previousTotalItemCount = 0;
     private boolean loading = true;
+    private boolean disableScrolling = false;
 
     final RecyclerView.LayoutManager mLayoutManager;
 
@@ -17,21 +16,9 @@ public abstract class PaginationScrollListener extends RecyclerView.OnScrollList
         visibleThreshold = visibleThreshold * layoutManager.getSpanCount();
     }
 
-    public int getLastVisibleItem(int[] lastVisibleItemPositions) {
-        int maxSize = 0;
-        for (int i = 0; i < lastVisibleItemPositions.length; i++) {
-            if (i == 0) {
-                maxSize = lastVisibleItemPositions[i];
-            } else if (lastVisibleItemPositions[i] > maxSize) {
-                maxSize = lastVisibleItemPositions[i];
-            }
-        }
-        return maxSize;
-    }
-
-
     @Override
     public void onScrolled(RecyclerView view, int dx, int dy) {
+        if(disableScrolling) return;
         int lastVisibleItemPosition = 0;
         int totalItemCount = mLayoutManager.getItemCount();
         lastVisibleItemPosition = ((GridLayoutManager) mLayoutManager).findLastVisibleItemPosition();
@@ -60,4 +47,7 @@ public abstract class PaginationScrollListener extends RecyclerView.OnScrollList
 
     public abstract void onLoadMore(int totalItemsCount, RecyclerView view);
 
+    public void setDisableScrolling(boolean disableScrolling) {
+        this.disableScrolling = disableScrolling;
+    }
 }

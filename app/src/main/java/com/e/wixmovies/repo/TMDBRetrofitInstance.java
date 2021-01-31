@@ -3,18 +3,17 @@ package com.e.wixmovies.repo;
 
 import android.content.Context;
 
-import java.io.IOException;
-
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class RetrofitInstance {
+public class TMDBRetrofitInstance {
 
     private static Retrofit retrofitTMDb = null;
     private static final String BASE_URL = "https://api.themoviedb.org/3/";
+    public static final String BASE_THUMBNAIL_URL = "https://image.tmdb.org/t/p/w500";
     private static OkHttpClient okHttpClient;
     private static int cacheSize = 10 * 1024 * 1024; // 10 MB
     private static Cache cache;
@@ -39,9 +38,12 @@ public class RetrofitInstance {
         okHttpClient = httpClient.build();
     }
 
-    public static void resetCache() throws IOException {
-        if (cache != null) {
+    public static void resetCache() {
+        try {
             cache.evictAll();
+        }
+        catch (Throwable e) {
+          //do nothing
         }
     }
 }

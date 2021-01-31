@@ -5,21 +5,25 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/title_layout">
+        android:id="@+id/title_layout"
+        android:padding="20dp">
         <ToggleButton
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:id="@+id/favoriteBtn"
+            android:id="@+id/addToWatchlistBtn"
             android:layout_alignParentEnd="true"
+            android:background="@drawable/add_to_watchlist_btn"
             android:layout_margin="10dp"
             android:layout_centerVertical="true"
             android:textOn=""
             android:textOff=""/>
         <TextView
             android:id="@+id/info_title"
+            android:textSize="20sp"
+           android:textStyle="bold"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_toStartOf="@id/favoriteBtn"
+            android:layout_toStartOf="@id/addToWatchlistBtn"
             android:layout_centerVertical="true"
             android:layout_margin="10dp"/>
     </RelativeLayout>
@@ -29,6 +33,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/title_layout"
+        android:textSize="14sp"
         android:padding="10dp"/>
 
 </RelativeLayout>

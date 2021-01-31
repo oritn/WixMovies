@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.e.wixmovies.R;
+import com.e.wixmovies.ui.watchlist.WatchlistFragment;
 import com.e.wixmovies.ui.movies.MoviesFragment;
 
 /**
@@ -28,9 +29,12 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        // getItem is called to instantiate the fragment for the given page.
-        // Return a PlaceholderFragment (defined as a static inner class below).
-        return MoviesFragment.newInstance(position + 1);
+        switch (position) {
+            case 1:
+                return WatchlistFragment.newInstance();
+            default:
+                return MoviesFragment.newInstance();
+        }
     }
 
     @Nullable

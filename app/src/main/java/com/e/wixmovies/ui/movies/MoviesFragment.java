@@ -2,13 +2,17 @@ package com.e.wixmovies.ui.movies;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -20,41 +24,32 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.e.wixmovies.R;
 import com.e.wixmovies.databinding.FragmentMoviesBinding;
 import com.e.wixmovies.model.MovieDO;
-import com.e.wixmovies.viewmodel.MoviesViewModel;
 import com.e.wixmovies.ui.PaginationScrollListener;
+import com.e.wixmovies.viewmodel.MoviesViewModel;
+import com.google.android.material.snackbar.Snackbar;
+
+import io.reactivex.disposables.CompositeDisposable;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MoviesFragment extends Fragment implements MovieInfoDialog.IFavoriteBtnClicked {
-
-    private static final String ARG_SECTION_NUMBER = "section_number";
+public class MoviesFragment extends Fragment implements MovieInfoDialog.IWatchlistBtnListener {
 
     private MoviesViewModel moviesViewModel;
     private FragmentMoviesBinding fragmentBinding;
     private MoviesListAdapter moviesAdapter;
     private PaginationScrollListener scrollListener;
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
-    public static MoviesFragment newInstance(int index) {
-        MoviesFragment fragment = new MoviesFragment();
-        Bundle bundle = new Bundle();
-        bundle.putInt(ARG_SECTION_NUMBER, index);
-        fragment.setArguments(bundle);
-        return fragment;
+    public static MoviesFragment newInstance() {
+        return new MoviesFragment();
     }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        moviesViewModel = new ViewModelProvider(this).get(MoviesViewModel.class);
-        moviesAdapter = new MoviesListAdapter(movie -> MovieInfoDialog.newInstance(movie).show(getFragmentManager(), movie.getId()));
-    }
-
 
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
         fragmentBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_movies, container, false);
         return fragmentBinding.getRoot();
     }
@@ -62,51 +57,44 @@ public class MoviesFragment extends Fragment implements MovieInfoDialog.IFavorit
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        RecyclerView recyclerView = fragmentBinding.moviesRV;
+        //set adapter
+        moviesAdapter = new MoviesListAdapter(movie -> {
+            movie.setOnWatchlist(moviesViewModel.isOnWatchList(movie));
+            MovieInfoDialog infoDialog = MovieInfoDialog.newInstance(movie);
+            infoDialog.setTargetFragment(MoviesFragment.this, 0);
+            infoDialog.show(getFragmentManager(), movie.getId());
+        });
+        //set view model
+        moviesViewModel = new ViewModelProvider(getActivity()).get(MoviesViewModel.class);
+        moviesViewModel.init(getActivity().getApplication());
+        //set swipe refresh view
         SwipeRefreshLayout swipeRefreshLayout = fragmentBinding.swiperefresh;
         swipeRefreshLayout.setOnRefreshListener(() -> {
             scrollListener.resetState();
-            moviesViewModel.getMovies(MoviesFragment.this, getContext());
+            moviesViewModel.refreshMovieList(MoviesFragment.this, getContext(), compositeDisposable);
             swipeRefreshLayout.setRefreshing(false);
         });
+        //set recycler view
+        RecyclerView recyclerView = fragmentBinding.moviesRV;
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
-
-        gridLayoutManager.scrollToPosition(0);
-        gridLayoutManager.scrollToPositionWithOffset(0, 0);
         recyclerView.setLayoutManager(gridLayoutManager);
         recyclerView.setAdapter(moviesAdapter);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+        //set scroll for fetching more movies on scroll
         scrollListener = new PaginationScrollListener(gridLayoutManager) {
             @Override
             public void onLoadMore(int totalItemsCount, RecyclerView view) {
                 fragmentBinding.loadMoreProgressBar.setVisibility(View.VISIBLE);
-                moviesViewModel.loadMoreMovies(MoviesFragment.this, getContext());
+                moviesViewModel.loadMoreMovies(MoviesFragment.this, getContext(), compositeDisposable);
             }
         };
         recyclerView.addOnScrollListener(scrollListener);
-      /*  recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if (dy > 0) { //check for scroll down
-                    int visibleItemCount = gridLayoutManager.getChildCount();
-                    int totalItemCount = gridLayoutManager.getItemCount();
-                    int pastVisibleItems = gridLayoutManager.findFirstVisibleItemPosition();
-
-                    if (!isLoading && (visibleItemCount + pastVisibleItems) >= totalItemCount) {
-                        isLoading = true;
-                        fragmentBinding.loadMoreProgressBar.setVisibility(View.VISIBLE);
-                        moviesViewModel.loadMoreMovies(MoviesFragment.this, getContext());
-                    }
-                }
-            }
-        });*/
         ProgressBar pb = fragmentBinding.progressBar;
-
+        //observe on data change
         moviesViewModel.errorMsg.observe(this, error -> {
             pb.setVisibility(View.GONE);
             fragmentBinding.loadMoreProgressBar.setVisibility(View.GONE);
-            Toast.makeText(getContext(), "There was an error retrieving the movies", Toast.LENGTH_LONG);
+            Snackbar.make(fragmentBinding.getRoot(), getString(R.string.internet_error), Snackbar.LENGTH_LONG).show();
         });
         moviesViewModel.moviesList.observe(this, movies -> {
             fragmentBinding.loadMoreProgressBar.setVisibility(View.GONE);
@@ -116,7 +104,7 @@ public class MoviesFragment extends Fragment implements MovieInfoDialog.IFavorit
         });
         if (savedInstanceState == null) {
             pb.setVisibility(View.VISIBLE);
-            moviesViewModel.getMovies(MoviesFragment.this, getContext());
+            moviesViewModel.getMovies(MoviesFragment.this, getContext(), compositeDisposable);
         }
         else {
             moviesAdapter.updateMoviesData(moviesViewModel.moviesList.getValue());
@@ -125,16 +113,51 @@ public class MoviesFragment extends Fragment implements MovieInfoDialog.IFavorit
     }
 
     @Override
-    public void onFavoriteBtnClicked(MovieDO movie, boolean isFavorite) {
-        if(isFavorite) {
-            moviesViewModel.addToFavorite(movie);
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.search_menu, menu);
+
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView)searchItem.getActionView();
+        //set done in the keyboard and not find symbol
+        searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener()
+        {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                moviesAdapter.getFilter().filter(newText);
+                scrollListener.setDisableScrolling(!newText.equals(""));
+                return false;
+            }
+        });
+    }
+
+    @Override
+    public void onWatchlistBtnClicked(MovieDO movie, boolean isOnWatchlist) {
+        if(isOnWatchlist) {
+            moviesViewModel.addToWatchlist(movie);
+            String text = String.format(getResources().getString(R.string.added_watchlist), movie.getTitle());
+            Snackbar.make(fragmentBinding.getRoot(), text, Snackbar.LENGTH_LONG).show();
         }
         else {
-            moviesViewModel.removeFromFavorite(movie);
+            moviesViewModel.removeFromWatchlist(movie);
+            String text = String.format(getResources().getString(R.string.removed_watchlist), movie.getTitle());
+            Snackbar.make(fragmentBinding.getRoot(), text, Snackbar.LENGTH_LONG).show();
         }
     }
 
     public interface IOnMovieClickedListener {
         void onMovieClicked(MovieDO movie);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        compositeDisposable.clear();
     }
 }

@@ -1,56 +1,95 @@
 package com.e.wixmovies.repo;
 
+import android.app.Application;
 import android.content.Context;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.e.wixmovies.BuildConfig;
+import com.e.wixmovies.db.MoviesDatabase;
+import com.e.wixmovies.db.WatchlistMoviesDAO;
+import com.e.wixmovies.model.MovieDO;
 import com.e.wixmovies.model.MoviesList;
 import com.e.wixmovies.model.MoviesListWrapper;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.util.List;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 public class MovieRepository {
 
-    //https://api.themoviedb.org/3/movie/popular?api_key=40ab4b29399a2e3f961acf68acc457e8&language=en-US&page=1
+    private WatchlistMoviesDAO watchListDB;
 
     private static MovieRepository instance;
 
-    private MovieRepository() { }
+    private MovieRepository(Application application) {
+        MoviesDatabase database = MoviesDatabase.getInstance(application);
+        watchListDB = database.getFDAO();
+    }
 
-    public static MovieRepository getInstance() {
+    public static MovieRepository getInstance(Application application) {
         if(instance == null) {
-            instance = new MovieRepository();
+            instance = new MovieRepository(application);
         }
         return instance;
     }
 
-    public MutableLiveData<MoviesListWrapper> getMoviesList(Context context) {
-      return getMoviesNextPage(context, 1);
+    public MutableLiveData<MoviesListWrapper> refreshMovieList(CompositeDisposable compositeDisposable, Context context) {
+        TMDBRetrofitInstance.resetCache();
+        return getMoviesList(compositeDisposable, context);
     }
 
-    public MutableLiveData<MoviesListWrapper> getMoviesNextPage(Context context, int page) {
-        ITMDBService apiService = RetrofitInstance.getTMDBService(context);
-        MutableLiveData<MoviesListWrapper>   moviesMutableLiveData = new MutableLiveData<>();
-        apiService.getPopularMovies(BuildConfig.ApiKey, page).enqueue(new Callback<MoviesList>() {
-            @Override
-            public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    moviesMutableLiveData.setValue(new MoviesListWrapper(response.body(), null));
-                } else {
-                    moviesMutableLiveData.setValue(new MoviesListWrapper(null, response.message()));
-                }
-            }
+    public MutableLiveData<MoviesListWrapper> getMoviesList(CompositeDisposable compositeDisposable, Context context) {
+      return getMoviesNextPage(compositeDisposable, context, 1);
+    }
 
-            @Override
-            public void onFailure(Call<MoviesList> call, Throwable t) {
-                moviesMutableLiveData.setValue(new MoviesListWrapper(null, t.getMessage()));
-            }
-        });
+    public MutableLiveData<MoviesListWrapper> getMoviesNextPage(CompositeDisposable compositeDisposable, Context context, int page) {
+        ITMDBService apiService = TMDBRetrofitInstance.getTMDBService(context);
+        MutableLiveData<MoviesListWrapper> moviesMutableLiveData = new MutableLiveData<>();
+        Observable<MoviesList> observable =  apiService.getPopularMovies(BuildConfig.ApiKey, page);
+        compositeDisposable.add(observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+            .subscribeWith(new DisposableObserver<MoviesList>() {
+
+                   @Override
+                   public void onNext(MoviesList value) {
+                       if (value != null) {
+                           moviesMutableLiveData.setValue(new MoviesListWrapper(value, null));
+                       } else {
+                           moviesMutableLiveData.setValue(new MoviesListWrapper(null, "an error accord while fetching data"));
+                       }
+                   }
+
+                   @Override
+                   public void onError(Throwable e) {
+                       moviesMutableLiveData.setValue(new MoviesListWrapper(null, e.getMessage()));
+                   }
+
+                   @Override
+                   public void onComplete() { }
+           }));
 
         return moviesMutableLiveData;
+    }
+
+
+    public LiveData<List<MovieDO>> getWatchList() {
+        return  watchListDB.getAllWatchlist();
+    }
+
+    public void addToWatchlist(MovieDO movie) {
+        watchListDB.insertMovie(movie);
+    }
+    public void removeFromWatchlist(MovieDO movie) {
+        watchListDB.deleteMovie(movie);
+    }
+
+    public MovieDO getMovie(String id) {
+        return watchListDB.getMovie(id);
     }
 
 

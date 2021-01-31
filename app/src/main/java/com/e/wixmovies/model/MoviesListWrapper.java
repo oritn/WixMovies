@@ -1,7 +1,5 @@
 package com.e.wixmovies.model;
 
-import java.util.List;
-
 public class MoviesListWrapper {
     private String errorMsg;
     private MoviesList movieList;

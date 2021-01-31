@@ -24,10 +24,6 @@ public class MoviesList implements Parcelable {
     private List<MovieDO> movies = null;
     public final static Creator<com.e.wixmovies.model.MoviesList> CREATOR = new Creator<MoviesList>() {
 
-
-        @SuppressWarnings({
-                "unchecked"
-        })
         public com.e.wixmovies.model.MoviesList createFromParcel(Parcel in) {
             return new com.e.wixmovies.model.MoviesList(in);
         }

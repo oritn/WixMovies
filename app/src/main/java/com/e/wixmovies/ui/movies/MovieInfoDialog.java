@@ -1,13 +1,9 @@
 package com.e.wixmovies.ui.movies;
 
-import android.app.Dialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.widget.CompoundButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -18,31 +14,44 @@ import com.e.wixmovies.model.MovieDO;
 
 public class MovieInfoDialog extends DialogFragment {
 
+    private static final String PARCELABLE_KEY = "movie";
+
     public static MovieInfoDialog newInstance(MovieDO movie) {
         MovieInfoDialog frag = new MovieInfoDialog();
         Bundle args = new Bundle();
-        args.putParcelable("movie", movie);
+        args.putParcelable(PARCELABLE_KEY, movie);
         frag.setArguments(args);
         return frag;
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.movie_info_dialog, container, false);
-        MovieDO movie = getArguments().getParcelable("movie");
+        // remove background dim
+        getDialog().getWindow().setDimAmount(0);
+        MovieDO movie = getArguments().getParcelable(PARCELABLE_KEY);
 
         TextView text = v.findViewById(R.id.info_title);
         TextView description = v.findViewById(R.id.info_description);
-        ToggleButton favoriteBtn = v.findViewById(R.id.favoriteBtn);
+        ToggleButton addToWatchlistBtn = v.findViewById(R.id.addToWatchlistBtn);
         text.setText(movie.getTitle());
         description.setText(movie.getOverview());
-        favoriteBtn.setOnCheckedChangeListener((compoundButton, isChecked) -> {
-            ((IFavoriteBtnClicked)getParentFragment()).onFavoriteBtnClicked(movie, isChecked);
+        addToWatchlistBtn.setChecked(movie.getOnWatchlist());
+        addToWatchlistBtn.setOnCheckedChangeListener((compoundButton, isChecked) -> {
+            ((IWatchlistBtnListener)getTargetFragment()).onWatchlistBtnClicked(movie, isChecked);
         });
         return v;
     }
 
-    public interface IFavoriteBtnClicked {
-        void onFavoriteBtnClicked(MovieDO movie, boolean isFavorite);
+        @Override
+        public void onStart() {
+            getDialog().getWindow().setWindowAnimations(
+                    R.style.DialogAnimation);
+            super.onStart();
+        }
+
+
+    public interface IWatchlistBtnListener {
+        void onWatchlistBtnClicked(MovieDO movie, boolean isFavorite);
     }
 
 }

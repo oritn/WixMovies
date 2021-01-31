@@ -1,5 +1,14 @@
 <resources>
-    <string name="app_name">WixMovies</string>
+    <string name="app_name">TMDB Movies</string>
     <string name="tab_text_1">Movies</string>
     <string name="tab_text_2">Watchlist</string>
+
+    <string name="no_items_on_your_watch_list">No items on your watch list</string>
+    <string name="added_watchlist">The movie \'%1$s\' was added to the watchlist</string>
+    <string name="removed_watchlist">The movie \'%1$s\' was removed from the watchlist</string>
+    <string name="internet_error">There was a problem, check you internet connection</string>
+    <string name="delete_movie_watchlist">Are you sure you want to Delete \'%1$s\'?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="watchlist_error">There was an error retrieving the movies</string>
 </resources>

@@ -10,6 +10,8 @@ import com.e.wixmovies.model.MovieDO;
 
 import java.util.List;
 
+import io.reactivex.Maybe;
+
 import static androidx.room.OnConflictStrategy.REPLACE;
 
 @Dao
@@ -22,7 +24,7 @@ public interface WatchlistMoviesDAO {
     void deleteMovie(MovieDO movie);
 
     @Query("select * from watchlist")
-    LiveData<List<MovieDO>> getAllWatchlist();
+    Maybe<List<MovieDO>> getAllWatchlist();
 
     @Query("select * from watchlist where id==:id")
     MovieDO getMovie(String id);

@@ -13,9 +13,11 @@ import com.e.wixmovies.model.MovieDO;
 import com.e.wixmovies.model.MoviesList;
 import com.e.wixmovies.model.MoviesListWrapper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableObserver;
@@ -97,12 +99,15 @@ public class MovieRepository {
 
 
     public LiveData<List<MovieDO>> getWatchList() {
-        return  watchListDB.getAllWatchlist();
+        MutableLiveData<List<MovieDO>> moviesMutableLiveData = new MutableLiveData<>();
+        watchListDB.getAllWatchlist().subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(movieList -> moviesMutableLiveData.setValue(movieList));
+        return moviesMutableLiveData;
     }
 
     public void addToWatchlist(MovieDO movie) {
         new Thread(() -> watchListDB.insertMovie(movie)).start();
-
     }
     public void removeFromWatchlist(MovieDO movie) {
         new Thread(() -> watchListDB.deleteMovie(movie)).start();

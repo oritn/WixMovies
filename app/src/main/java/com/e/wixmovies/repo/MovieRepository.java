@@ -101,15 +101,15 @@ public class MovieRepository {
     }
 
     public void addToWatchlist(MovieDO movie) {
-        watchListDB.insertMovie(movie);
+        new Thread(() -> watchListDB.insertMovie(movie)).start();
+
     }
     public void removeFromWatchlist(MovieDO movie) {
-        watchListDB.deleteMovie(movie);
+        new Thread(() -> watchListDB.deleteMovie(movie)).start();
     }
 
     public MovieDO getMovie(String id) {
         return watchListDB.getMovie(id);
     }
-
 
 }

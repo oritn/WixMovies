@@ -26,6 +26,9 @@ import com.e.wixmovies.model.MovieDO;
 import com.e.wixmovies.ui.movies.MoviesListAdapter;
 import com.e.wixmovies.viewmodel.MoviesViewModel;
 
+/**
+ * the watchlist fragment
+ */
 public class WatchlistFragment extends Fragment {
 
     private MoviesViewModel moviesViewModel;
@@ -65,8 +68,10 @@ public class WatchlistFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        //view model
         moviesViewModel = new ViewModelProvider(getActivity()).get(MoviesViewModel.class);
         moviesViewModel.init(getActivity().getApplication());
+        //recycler view
         RecyclerView recyclerView = fragmentBinding.watchList;
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);

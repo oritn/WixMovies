@@ -31,7 +31,7 @@ import com.google.android.material.snackbar.Snackbar;
 import io.reactivex.disposables.CompositeDisposable;
 
 /**
- * A placeholder fragment containing a simple view.
+ * Fragment showing the list of movies
  */
 public class MoviesFragment extends Fragment implements MovieInfoDialog.IWatchlistBtnListener {
 

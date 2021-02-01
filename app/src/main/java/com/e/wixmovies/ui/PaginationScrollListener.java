@@ -45,8 +45,17 @@ public abstract class PaginationScrollListener extends RecyclerView.OnScrollList
         this.loading = true;
     }
 
+    /**
+     * notify that the listener should load more data
+     * @param totalItemsCount
+     * @param view
+     */
     public abstract void onLoadMore(int totalItemsCount, RecyclerView view);
 
+    /**
+     * disable loading more data
+     * @param disableScrolling
+     */
     public void setDisableScrolling(boolean disableScrolling) {
         this.disableScrolling = disableScrolling;
     }

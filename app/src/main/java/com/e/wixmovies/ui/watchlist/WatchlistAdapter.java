@@ -74,6 +74,7 @@ public class WatchlistAdapter extends RecyclerView.Adapter<WatchlistAdapter.Watc
             this.watchlistItemBinding = viewBinding;
             this.mView = itemView;
             Button deleteBtn = this.mView.findViewById(R.id.delete);
+            //show dialog before removing
             deleteBtn.setOnClickListener(view -> {
                 int position = getLayoutPosition();
                 MovieDO movie = WatchlistAdapter.this.watchlistMovies.get(position);

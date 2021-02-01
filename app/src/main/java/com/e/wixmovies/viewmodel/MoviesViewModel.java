@@ -33,6 +33,12 @@ public class MoviesViewModel extends ViewModel {
         repository = MovieRepository.getInstance(app);
     }
 
+    /**
+     * refresh the movies data by getting the movies from the TMBD server and clear the cache
+     * @param cycleOwner
+     * @param context
+     * @param compositeDisposable
+     */
     public void refreshMovieList(LifecycleOwner cycleOwner, Context context, CompositeDisposable compositeDisposable) {
         currentMoviesPage = 0;
         repository.refreshMovieList(compositeDisposable, context).observe(cycleOwner, movies -> {
@@ -47,6 +53,12 @@ public class MoviesViewModel extends ViewModel {
         });
     }
 
+    /**
+     * get the movie list from the first page, it will get it from cache if exists
+     * @param cycleOwner
+     * @param context
+     * @param compositeDisposable
+     */
     public void getMovies(LifecycleOwner cycleOwner, Context context, CompositeDisposable compositeDisposable) {
         currentMoviesPage = 0;
         repository.getMoviesList(compositeDisposable, context).observe(cycleOwner, movies -> {
@@ -61,6 +73,12 @@ public class MoviesViewModel extends ViewModel {
         });
     }
 
+    /**
+     * get the next page of movies, it will get it from cache if exists
+     * @param cycleOwner
+     * @param context
+     * @param compositeDisposable
+     */
     public void loadMoreMovies(LifecycleOwner cycleOwner, Context context, CompositeDisposable compositeDisposable) {
 
         repository.getMoviesNextPage(compositeDisposable, context, currentMoviesPage + 1).observe(cycleOwner, movies -> {
@@ -77,12 +95,21 @@ public class MoviesViewModel extends ViewModel {
         });
     }
 
+    /**
+     * retrive the watch list from the db
+     * @param cycleOwner
+     */
     public void getWatchList(LifecycleOwner cycleOwner) {
         repository.getWatchList().observe(cycleOwner, movies -> {
             moviesWatchlist.setValue(movies);
         });
     }
 
+    /**
+     * checks if the movie present in the watch list
+     * @param movie
+     * @return
+     */
     public boolean isOnWatchList(MovieDO movie) {
         return (getMovie(movie.getId()) != null);
     }

@@ -39,15 +39,34 @@ public class MovieRepository {
         return instance;
     }
 
+    /**
+     * refresh the movies data by getting the movies from the TMBD server
+     * @param compositeDisposable
+     * @param context
+     * @return live data to obser for changes
+     */
     public MutableLiveData<MoviesListWrapper> refreshMovieList(CompositeDisposable compositeDisposable, Context context) {
         TMDBRetrofitInstance.resetCache();
         return getMoviesList(compositeDisposable, context);
     }
 
+    /**
+     * get the movie list from the first page, it will get it from cache if exists
+     * @param compositeDisposable
+     * @param context
+     * @return live data to obser for changes
+     */
     public MutableLiveData<MoviesListWrapper> getMoviesList(CompositeDisposable compositeDisposable, Context context) {
       return getMoviesNextPage(compositeDisposable, context, 1);
     }
 
+    /**
+     * get the movie list according to the provided page num, it will get it from cache if exists
+     * @param compositeDisposable
+     * @param context
+     * @param page
+     * @return live data to obser for changes
+     */
     public MutableLiveData<MoviesListWrapper> getMoviesNextPage(CompositeDisposable compositeDisposable, Context context, int page) {
         ITMDBService apiService = TMDBRetrofitInstance.getTMDBService(context);
         MutableLiveData<MoviesListWrapper> moviesMutableLiveData = new MutableLiveData<>();

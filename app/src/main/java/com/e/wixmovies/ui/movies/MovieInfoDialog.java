@@ -12,6 +12,9 @@ import androidx.fragment.app.DialogFragment;
 import com.e.wixmovies.R;
 import com.e.wixmovies.model.MovieDO;
 
+/**
+ * display movie info
+ */
 public class MovieInfoDialog extends DialogFragment {
 
     private static final String PARCELABLE_KEY = "movie";
@@ -44,8 +47,7 @@ public class MovieInfoDialog extends DialogFragment {
 
         @Override
         public void onStart() {
-            getDialog().getWindow().setWindowAnimations(
-                    R.style.DialogAnimation);
+            getDialog().getWindow().setWindowAnimations(R.style.DialogAnimation);
             super.onStart();
         }
 
